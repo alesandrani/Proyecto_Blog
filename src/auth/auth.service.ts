@@ -29,7 +29,7 @@ export class AuthService {
     }
   }
 
-  async register(name: string, surname: string, email: string, password: string) {
+  async register(name: string, email: string, password: string) {
     try {
       const existingUser = await this.prisma.usuario.findUnique({ where: { email } });
       if (existingUser) {
@@ -39,7 +39,6 @@ export class AuthService {
       return this.prisma.usuario.create({
         data: {
           name,
-          surname,
           email,
           password: hashedPassword,
         },

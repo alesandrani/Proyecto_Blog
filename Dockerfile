@@ -1,20 +1,27 @@
-# Usa una imagen base de Node.js
-FROM node:18
+# Base image
+FROM node:18-alpine
 
-# Establece el directorio de trabajo dentro del contenedor
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copia los archivos de configuración y dependencias
+# Copy package files
 COPY package*.json ./
 
-# Instala las dependencias
+# Install dependencies
 RUN npm install
 
-# Copia el resto de los archivos de la aplicación
+# Generate Prisma Client
+COPY prisma ./prisma/
+RUN npx prisma generate
+
+# Copy app source
 COPY . .
 
-# Expone el puerto 3000
+# Build application
+RUN npm run build
+
+# Expose port
 EXPOSE 3000
 
-# Comando para iniciar la aplicación
-CMD ["npm", "run", "start:dev"]
+# Start application
+CMD ["npm", "run", "start:prod"]

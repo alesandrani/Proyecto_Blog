@@ -12,7 +12,7 @@ export class UserController {
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(
       createUserDto.name,
-      createUserDto.surname,
+      // createUserDto.surname,
       createUserDto.email,
       createUserDto.password,
     );
@@ -23,7 +23,7 @@ export class UserController {
   async createUserDirect(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(
       createUserDto.name,
-      createUserDto.surname,
+      // createUserDto.surname,
       createUserDto.email,
       createUserDto.password,
     );
@@ -44,7 +44,7 @@ export class UserController {
     return this.userService.updateUser(
       id,
       updateUserDto.name,
-      updateUserDto.surname,
+      // updateUserDto.surname,
       updateUserDto.email,
     );
   }

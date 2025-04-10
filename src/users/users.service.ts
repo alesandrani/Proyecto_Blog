@@ -14,7 +14,7 @@ export class UserService {
   ) {}
 
   // Registro de nuevos usuarios
-  async createUser(name: string, surname: string, email: string, password: string) {
+  async createUser(name: string, email: string, password: string) {
     // Verificar si el usuario ya existe
     const userExists = await this.prisma.usuario.findUnique({
       where: { email },
@@ -30,7 +30,7 @@ export class UserService {
     const user = await this.prisma.usuario.create({
       data: {
         name,
-        surname,
+        // surname,
         email,
         password: hashedPassword,
       },
@@ -82,6 +82,71 @@ export class UserService {
   async findById(id: number) {
     return this.prisma.usuario.findUnique({
       where: { id },
+    });
+  }
+
+  async updateUser(id: number, name: string, email: string) {
+    // Verificar si el usuario existe
+    const user = await this.prisma.usuario.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    // Verificar si el nuevo email ya está en uso por otro usuario
+    if (email !== user.email) {
+      const emailExists = await this.prisma.usuario.findUnique({
+        where: { email },
+      });
+
+      if (emailExists) {
+        throw new Error('El correo electrónico ya está en uso');
+      }
+    }
+
+    return this.prisma.usuario.update({
+      where: { id },
+      data: {
+        name,
+        // surname,
+        email,
+      },
+      select: {
+        id: true,
+        name: true,
+        // surname: true,
+        email: true,
+      },
+    });
+  }
+
+  async deleteUser(id: number) {
+    // Verificar si el usuario existe
+    const user = await this.prisma.usuario.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    await this.prisma.usuario.delete({
+      where: { id },
+    });
+
+    return { message: 'Usuario eliminado correctamente' };
+  }
+
+  async getAllUsers() {
+    return this.prisma.usuario.findMany({
+      select: {
+        id: true,
+        name: true,
+        // surname: true,
+        email: true,
+      },
     });
   }
 }
