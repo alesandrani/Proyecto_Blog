@@ -11,19 +11,43 @@ export class BlogsService {
     async createBlog(blogDto: BlogDto, userId: number) {
         return await this.prisma.blog.create({
             data: {
-                name: blogDto.name,
+                title: blogDto.title,
+                content: blogDto.content,
+                summary: blogDto.summary,
+                isPublic: blogDto.isPublic,
+                tags: blogDto.tags,
+                imageUrl: blogDto.imageUrl,
                 userId: userId
+            },
+            include: {
+                user: true
             }
         });
     }
 
     async findAllBlogs() {
-        return await this.prisma.blog.findMany({
+        const blogs = await this.prisma.blog.findMany({
+            where: {
+                isPublic: true
+            },
             include: {
-                user: true,
-                posts: true
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }
             }
         });
+
+        return blogs.map(blog => ({
+            ...blog,
+            author: {
+                id: blog.user.id,
+                name: blog.user.name
+            }
+        }));
     }
 
     async findBlogWithPosts(blogId: number) {
@@ -58,7 +82,15 @@ export class BlogsService {
         return await this.prisma.blog.update({
             where: { id: blogId },
             data: {
-                name: blogDto.name
+                title: blogDto.title,
+                content: blogDto.content,
+                summary: blogDto.summary,
+                isPublic: blogDto.isPublic,
+                tags: blogDto.tags,
+                imageUrl: blogDto.imageUrl
+            },
+            include: {
+                user: true
             }
         });
     }

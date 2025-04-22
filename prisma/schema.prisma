@@ -21,7 +21,12 @@ model Usuario {
 
 model Blog {
   id        Int      @id @default(autoincrement())
-  name      String
+  title     String
+  content   String
+  summary   String
+  isPublic  Boolean  @default(true)
+  tags      String[]
+  imageUrl  String?
   userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

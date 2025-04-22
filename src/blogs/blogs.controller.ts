@@ -14,6 +14,16 @@ export class BlogsController {
         return await this.blogsService.createBlog(blogDto, userId);
     }
 
+    @Get('public')
+    async findPublicBlogs() {
+        try {
+            return await this.blogsService.findAllBlogs();
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Get()
     async findAllBlogs() {
         return await this.blogsService.findAllBlogs();

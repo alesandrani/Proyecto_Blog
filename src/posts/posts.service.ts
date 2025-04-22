@@ -10,8 +10,8 @@ export class PostsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createPostDto: CreatePostDto, userId: number) {
-    return this.prisma.$transaction(async (tx) => {
-      const blog = await tx.blog.findUnique({
+    return await this.prisma.$transaction(async (prisma) => {
+      const blog = await prisma.blog.findUnique({
         where: { id: createPostDto.blogId },
         select: { id: true, userId: true },
       });
@@ -20,7 +20,7 @@ export class PostsService {
         throw new NotFoundException('Blog not found');
       }
 
-      return tx.post.create({
+      return prisma.post.create({
         data: {
           ...createPostDto,
           userId,
@@ -33,13 +33,7 @@ export class PostsService {
               email: true,
             },
           },
-          blog: {
-            select: {
-              id: true,
-              name: true,
-              userId: true,
-            },
-          },
+          blog: true,
         },
       });
     });
@@ -70,13 +64,7 @@ export class PostsService {
             email: true,
           },
         },
-        blog: {
-          select: {
-            id: true,
-            name: true,
-            userId: true,
-          },
-        },
+        blog: true,
       },
     });
   }
@@ -92,13 +80,7 @@ export class PostsService {
             email: true,
           },
         },
-        blog: {
-          select: {
-            id: true,
-            name: true,
-            userId: true,
-          },
-        },
+        blog: true,
       },
     });
 
@@ -110,15 +92,11 @@ export class PostsService {
   }
 
   async update(id: number, updatePostDto: UpdatePostDto, userId: number) {
-    return this.prisma.$transaction(async (tx) => {
-      const post = await tx.post.findUnique({
+    return await this.prisma.$transaction(async (prisma) => {
+      const post = await prisma.post.findUnique({
         where: { id },
         include: {
-          blog: {
-            select: {
-              userId: true,
-            },
-          },
+          blog: true,
         },
       });
 
@@ -131,7 +109,7 @@ export class PostsService {
         throw new ForbiddenException('You do not have permission to update this post');
       }
 
-      return tx.post.update({
+      return prisma.post.update({
         where: { id },
         data: updatePostDto,
         include: {
@@ -142,28 +120,18 @@ export class PostsService {
               email: true,
             },
           },
-          blog: {
-            select: {
-              id: true,
-              name: true,
-              userId: true,
-            },
-          },
+          blog: true,
         },
       });
     });
   }
 
   async remove(id: number, userId: number) {
-    return this.prisma.$transaction(async (tx) => {
-      const post = await tx.post.findUnique({
+    return await this.prisma.$transaction(async (prisma) => {
+      const post = await prisma.post.findUnique({
         where: { id },
         include: {
-          blog: {
-            select: {
-              userId: true,
-            },
-          },
+          blog: true,
         },
       });
 
@@ -176,7 +144,7 @@ export class PostsService {
         throw new ForbiddenException('You do not have permission to delete this post');
       }
 
-      await tx.post.delete({
+      await prisma.post.delete({
         where: { id },
       });
 
