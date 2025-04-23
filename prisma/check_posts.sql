@@ -1,0 +1,1 @@
+SELECT * FROM "Post" WHERE "blogId" = 3; 

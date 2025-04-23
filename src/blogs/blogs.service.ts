@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { BlogDto } from './dto/blog.dto';
+import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @Injectable()
 export class BlogsService {
@@ -54,8 +55,24 @@ export class BlogsService {
         const blog = await this.prisma.blog.findUnique({
             where: { id: blogId },
             include: {
-                posts: true,
-                user: true
+                posts: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }
             }
         });
 
@@ -63,10 +80,30 @@ export class BlogsService {
             throw new NotFoundException('Blog no encontrado');
         }
 
-        return blog;
+        const { user, ...blogWithoutUser } = blog;
+
+        return {
+            ...blogWithoutUser,
+            author: {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            },
+            posts: blog.posts.map(post => {
+                const { user: postUser, ...postWithoutUser } = post;
+                return {
+                    ...postWithoutUser,
+                    author: {
+                        id: postUser.id,
+                        name: postUser.name,
+                        email: postUser.email
+                    }
+                };
+            })
+        };
     }
 
-    async updateBlog(blogId: number, blogDto: BlogDto, userId: number) {
+    async updateBlog(blogId: number, blogDto: UpdateBlogDto, userId: number) {
         const blog = await this.prisma.blog.findUnique({
             where: { id: blogId }
         });
@@ -84,8 +121,6 @@ export class BlogsService {
             data: {
                 title: blogDto.title,
                 content: blogDto.content,
-                summary: blogDto.summary,
-                isPublic: blogDto.isPublic,
                 tags: blogDto.tags,
                 imageUrl: blogDto.imageUrl
             },
